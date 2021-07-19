@@ -45,4 +45,11 @@ class Beatbomb extends Moveable{
             this.dispatchEvent(new Event('burst'))
         }
     }
+
+    checkPlayer(){
+        const player = this.externals.player
+        if (!player.invulnerable && collideCircleCircle(player.x, player.y, player.d, this.pos.x, this.pos.y, this.size)) {
+            this.dispatchEvent(new Event("hitPlayer"))
+        }
+    }
 }

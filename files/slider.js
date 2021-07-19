@@ -16,7 +16,7 @@ class Slider{
         noFill()
         rect(this.x, this.y, this.width, this.height)
         noStroke()
-        fill(255)
+        fill('255')
         if (this.left){
             rect(this.x, this.y, this.width/2, this.height)
         } else {
@@ -37,6 +37,8 @@ class Slider{
     checkClick(){
         if (collidePointRect(mouseX, mouseY, this.x, this.y, this.width, this.height)){
             this.left = !this.left
+            return true
         }
+        return false
     }
 }

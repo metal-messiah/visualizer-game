@@ -3,9 +3,9 @@ const maxLasers = 10
 const maxSines = 10
 const stagePadding = 200
 const bumpDelay = 1000
-const laserDebounce = 5000
+const laserDebounce = 1000
 
-let stage, player, music, musicInput, amp, loadSong, playMode, timer, bars, sine;
+let stage, player, music, musicInput, amp, loadSong, playMode, timer, bars, sine, health;
 
 let bubbles = []
 let lasers = []
@@ -26,6 +26,7 @@ function setup() {
   showBubbles = new Slider(windowWidth/4 - 50, 25, "Off", "Bubbles")
   showLasers = new Slider(windowWidth/4 - 50, 50, "Off", "Lasers")
   showBeatBombs = new Slider(windowWidth/2 - 50, 25, "Off", "Beat Bombs")
+  showHealth = new Slider(windowWidth/2 - 50, 50, "Off", "Health")
   showSines = new Slider((3 * windowWidth/4) - 50, 25, "Off", "Waves")
   showBars = new Slider((3 * windowWidth/4) - 50, 50, "Off", "Bars", 'left')
   // bottom
@@ -35,10 +36,11 @@ function setup() {
   loadSong = new LoadSong(windowWidth/2 - 50, windowHeight/2 - 25)
   stage = new Stage(stagePadding)
 
+
   musicInput = createFileInput(e => {
     started = true
     player = new Player({stage, playMode})
-    timer = new Timer()
+    // timer = new Timer()
     loadSong.handleFile(e)
     music = loadSound(e.data, (m) => m.play())
     amp = new Amp();
@@ -53,6 +55,8 @@ function setup() {
     })
     
     bars = new Bars({amp, stage, showBars})
+    if (showHealth.selected === 'health') addHealthBall()
+    
   })
 }
 
@@ -67,10 +71,11 @@ function draw() {
   bars?.draw()
   beatBombs?.forEach(bb => bb.draw())
   if (isGame?.selected === 'game') player?.draw()
+  health?.draw()
 
   // GUI
   stage?.draw()
-  timer?.draw()
+  // timer?.draw()
   if (!started) loadSong?.draw()
   playMode?.draw()
   showBubbles?.draw()
@@ -79,10 +84,11 @@ function draw() {
   showBars?.draw()
   showBeatBombs?.draw()
   isGame?.draw()
+  showHealth?.draw()
 }
 
 function addBeatBomb(){
-  const beatBomb = new Beatbomb(random(stage.padding/2, windowWidth - stage.padding/2), {showBeatBombs})
+  const beatBomb = new Beatbomb(random(stage.padding/2, windowWidth - stage.padding/2), {showBeatBombs, player})
     beatBomb.addEventListener('burst',() => {
       for(let i = 0; i < 25; i++) {
         addBubble(beatBomb.pos, true)
@@ -125,14 +131,27 @@ function addLaser(){
     const laser = dir ? 
       new Laser(dir, random(100, windowWidth - 100), windowHeight, {amp, bumpDelay, player, stage, showLasers}) : 
       new Laser(dir, 0, random(100, windowHeight -100), {amp, bumpDelay, player, stage, showLasers})
-    laser.addEventListener('hitPlayer', event => hitPlayer())
-    laser.addEventListener('delete', event => {
+    laser.addEventListener('hitPlayer', () => hitPlayer())
+    laser.addEventListener('delete', () => {
       lasers = lasers.filter(l => l.id !== laser.id)
     })
     lasers.push(laser)
 
     setTimeout(() => {addingLaser = false}, laserDebounce)
   }
+}
+
+function addHealthBall(){
+  setTimeout(() => {
+    if (!health){
+      health = new Health(random(stage.padding/2, windowWidth - stage.padding/2), random(stage.padding/2, windowHeight - stage.padding/2), {stage, player})
+      health.addEventListener("hitPlayer", () => {
+        player.increaseHealth()
+        health = null
+        addHealthBall()
+      })
+    }
+  }, 10000)
 }
 
 function hitPlayer(){
@@ -168,4 +187,5 @@ function mouseClicked(){
   showBars.checkClick()
   isGame.checkClick()
   showBeatBombs.checkClick()
+  if (showHealth.checkClick() && showHealth.selected === 'health' && started) addHealthBall()
 }

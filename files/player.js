@@ -18,6 +18,8 @@ class Player{
         this.invulnerable = false
 
         this.pulse = null
+
+        this.color = 'black'
     };
 
     boost(){
@@ -39,7 +41,7 @@ class Player{
         push()
         stroke(255)
         strokeWeight(1)
-        fill(0)
+        fill(this.color)
         circle(this.x, this.y, this.d)
         textAlign(CENTER, CENTER)
         fill(255)
@@ -83,5 +85,17 @@ class Player{
                 this.pulse = null
             }, this.debounce)
         }
+    }
+
+    increaseHealth(){
+        if (this.health < this.maxHealth) this.health++
+        const prevC = this.color
+        const prevD = this.d
+        this.d = 30
+        this.color = 'red'
+        setTimeout((opts) => {
+            this.color = opts.prevC
+            this.d = opts.prevD
+        }, 1000, {prevC, prevD})
     }
 }

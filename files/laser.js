@@ -1,14 +1,12 @@
-class Laser extends EventTarget{
+class Laser extends Moveable{
     constructor(dir, x, y, externals) {
-        super()
-        this.externals = externals
+        super(x, y, externals)
         this.fullWidth = 50
         this.preWidth = 25
         this.currentWidth = this.preWidth
         // up or right or diagonal
         this.origDir = dir
         this.dir = this.getDir(dir, x, y)
-        this.pos = createVector(x, y)
         this.horiz = x === 0
         this.fullAlpha = 1
         this.preAlpha = 0.5
@@ -16,16 +14,12 @@ class Laser extends EventTarget{
         this.easing = 0.1
         this.blasting = false
 
-        this.newPos
-        this.newDir
         this.newLocation()
 
         this.moving = true
-
         this.blastedAt = null
-
-        this.deleteAfter = 5000
-
+        this.deleteAfter = 3000
+        this.lifeSpan = 15000
         this.deleting = false;
 
         this.externals.amp.addEventListener("bump", () => {
@@ -34,12 +28,15 @@ class Laser extends EventTarget{
                 this.blastedAt = new Date()
                 setTimeout(() => {
                     this.blasting = false
-
                     this.newLocation()
                     this.moving = true
                 }, externals.bumpDelay)
             }
         })
+
+        setTimeout(() => {
+            this.deleting = true
+        }, this.lifeSpan)
     }
     
     newLocation(){
@@ -78,8 +75,7 @@ class Laser extends EventTarget{
                 const now = new Date()
                 const diff = now - this.blastedAt;
                 if (new Date(diff).getSeconds() > this.deleteAfter/1000) {
-                    
-                    this.dispatchEvent(new Event("delete"))
+                    this.deleting = true
                 }
             }, this.deleteAfter)
         }
@@ -106,11 +102,17 @@ class Laser extends EventTarget{
 
     draw() {
         if (this.externals.showLasers.selected !== 'lasers') return
+        if (this.deleting) {
+            this.currentAlpha = this.preAlpha
+            this.currentWidth -= 0.5
+            this.showPath()
+            if (this.currentWidth <= 0) this.dispatchEvent(new Event("delete"))
+            return
+        }
         this.checkBlast()
         this.showPath()
         this.checkPlayer()
 
         if (this.moving) this.move()
-        if (this.deleting) this.del()
     }
 }

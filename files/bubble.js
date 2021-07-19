@@ -8,7 +8,6 @@ class Bubble extends Moveable{
         this.height = min(width, height)
 
         this.speed = 0.1
-
         this.dir = createVector(random(-this.speed, this.speed), random(-this.speed, this.speed))
 
         this.lastChange = null
