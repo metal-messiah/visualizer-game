@@ -1,10 +1,10 @@
 class Slider{
-    constructor(x,y, leftText, rightText){
+    constructor(x,y, leftText, rightText, startingSide = 'right'){
         this.x = x
         this.y = y
         this.leftText = leftText
         this.rightText = rightText
-        this.left = true
+        this.left = startingSide === 'left'
         this.width = 100
         this.height = 25
     }
@@ -13,6 +13,7 @@ class Slider{
         push()
         stroke(255)
         strokeWeight(1)
+        noFill()
         rect(this.x, this.y, this.width, this.height)
         noStroke()
         fill(255)

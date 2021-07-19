@@ -2,58 +2,74 @@
 
 class Bubble extends Moveable{
     constructor(x, y, width, height, externals){
-        super(x, y)
-        const {stage, amp, bumpDelay} = externals
-        this.width = width
-        this.height = height
+        super(x, y, externals)
+        const {stage, amp, bumpDelay, player} = externals
+        this.width = min(width, height)
+        this.height = min(width, height)
 
-        this.speed = 0.01
+        this.speed = 0.1
 
-        this.dir = createVector(random(0, this.speed), random(-this.speed, this.speed))
+        this.dir = createVector(random(-this.speed, this.speed), random(-this.speed, this.speed))
 
         this.lastChange = null
 
         this.stage = stage
 
         this.amp = amp
-        this.amp.addEventListener("bump", () => this.bump())
+        // this.amp.addEventListener("bump", () => this.bump())
 
         this.bumpDelay = bumpDelay
+        this.player = player
 
         this.bumping = false;
         this.checkDir = true
+
+        this.maxSpeed = 5
+        this.c = [random(0,255), random(0, 255), random(0, 255)]
     }
 
     draw(){
+        if (this.externals.showBubbles.selected !== 'bubbles') return
         const {x, y} = this.pos
-        const {width, height} = this
-        this.showPath()
+
+        this.showPath(this.width)
         push()
-        fill('maroon')
-        // rect(x, y, width, height) 
-        circle(x, y, min(width, height))
+        fill(this.c)
+        noStroke()
+        circle(x, y, this.width)
         pop()
 
-        this.applyForce(this.dir)
+        if (this.vel.x < this.maxSpeed || this.vel.y < this.maxSpeed) this.applyForce(this.dir)
         this.update()
         this.checkDirection()
         this.checkPlayer()
-        this.showPath(this.width)
+        
     }
 
     checkPlayer(){
-        if (collidePointRect(mouseX, mouseY, this.pos.x, this.pos.y, this.width, this.height)) this.dispatchEvent(new Event("hitPlayer"))
+        const player = this.player
+        if (!player.invulnerable && collideCircleCircle(player.x, player.y, player.d, this.pos.x, this.pos.y, min(this.width, this.height))) {
+            this.dispatchEvent(new Event("hitPlayer"))
+        }
+    }
+
+	showPath(thickness){
+        push()
+        strokeWeight(thickness)
+        stroke('rgba(255,255,255,0.075)')
+		const beg = {x: this.pos.x, y: this.pos.y}
+		const end = {x: this.pos.x + this.vel.x * 1000000, y: this.pos.y + this.vel.y * 1000000}
+        line(beg.x, beg.y, end.x, end.y)
+        pop()
     }
 
     bump() {
         if (!this.bumping) {
             this.bumping = true
-            // this.applyForce(createVector(this.dir.x * 1000, this.dir.y * 1000))
             this.vel.mult(5)
             this.dispatchEvent(new Event("bump"))
             setTimeout(() => {
                 this.bumping = false
-                // this.applyForce(createVector(this.dir.x * -1000, this.dir.y * -1000))
                 this.vel.div(5)
             }, this.bumpDelay)
         }
@@ -62,7 +78,6 @@ class Bubble extends Moveable{
     checkDirection(){
         let hit = false
         // hit right
-        if(this.checkDir) {
         if (this.pos.x + this.width >= windowWidth && this.lastChange !== 'right') {
             this.vel = createVector(-1 * this.vel.x, this.vel.y)
             this.dir = createVector(random(-1 * this.speed, 0), this.dir.y)
@@ -90,10 +105,6 @@ class Bubble extends Moveable{
             this.lastChange = 'top'
             hit = true
         }
-    }
-    if(this.speed === 10) {
-        this.checkDir = false
-    }
         if (hit) this.dispatchEvent(new Event("hitWall"))
     }
 }

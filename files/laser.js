@@ -1,27 +1,88 @@
 class Laser extends EventTarget{
     constructor(dir, x, y, externals) {
         super()
+        this.externals = externals
         this.fullWidth = 50
         this.preWidth = 25
         this.currentWidth = this.preWidth
         // up or right or diagonal
-        this.dir = !dir ? createVector(windowWidth, y) : createVector(x, 0)
+        this.origDir = dir
+        this.dir = this.getDir(dir, x, y)
         this.pos = createVector(x, y)
+        this.horiz = x === 0
         this.fullAlpha = 1
         this.preAlpha = 0.5
         this.currentAlpha = this.preAlpha
         this.easing = 0.1
         this.blasting = false
-        externals.amp.addEventListener("bump", () => {
-            if (!this.blasting){
+
+        this.newPos
+        this.newDir
+        this.newLocation()
+
+        this.moving = true
+
+        this.blastedAt = null
+
+        this.deleteAfter = 5000
+
+        this.deleting = false;
+
+        this.externals.amp.addEventListener("bump", () => {
+            if (!this.blasting && !this.moving){
                 this.blasting = true
-                setTimeout(() => this.blasting = false, externals.bumpDelay)
+                this.blastedAt = new Date()
+                setTimeout(() => {
+                    this.blasting = false
+
+                    this.newLocation()
+                    this.moving = true
+                }, externals.bumpDelay)
             }
         })
     }
+    
+    newLocation(){
+        const padding = this.externals.stage.padding/2
+        if (this.horiz) this.newPos = createVector(this.pos.x, random(padding, windowHeight - padding))
+        if (!this.horiz) this.newPos = createVector(random(padding, windowWidth - padding), windowHeight)
+                    
+        this.newDir = this.getDir(this.origDir, this.newPos.x, this.newPos.y)
+    }
 
-    checkHitPlayer() {
-        if (this.pos.y && collidePointRect(player.x, player.y, this.pos.x, this.pos.y, windowWidth, this.currentWidth)) this.dispatchEvent(new Event("hitPlayer"))
+    checkPlayer(){
+        const player = this.externals.player
+        const laser = this.horiz ? 
+            {x: this.pos.x, y:this.pos.y - this.currentWidth/2, width: windowWidth, height: this.currentWidth} :
+            {x: this.pos.x - this.currentWidth/2, y:0, width: this.currentWidth, height: windowHeight}
+        if (!player.invulnerable && this.currentAlpha > 0.9 && collideRectCircle(laser.x, laser.y, laser.width, laser.height, player.x, player.y, player.d)) this.dispatchEvent(new Event("hitPlayer"))
+    }
+
+    getDir(dir, x, y){
+        return !dir ? createVector(windowWidth, y) : createVector(x, 0)
+    }
+
+    move(){
+        if (this.horiz) {
+            this.pos.y += (this.newPos.y - this.pos.y) * this.easing
+            this.dir.y += (this.newDir.y - this.dir.y) * this.easing
+            if (Math.abs(this.pos.y - this.newPos.y) < 0.01) this.moving = false
+        }
+        if (!this.horiz) {
+            this.pos.x += (this.newPos.x - this.pos.x) * this.easing
+            this.dir.x += (this.newDir.x - this.dir.x) * this.easing
+            if (Math.abs(this.pos.x - this.newPos.x) < 0.01) this.moving = false
+        }
+        if (!this.moving){
+            setTimeout(() => {
+                const now = new Date()
+                const diff = now - this.blastedAt;
+                if (new Date(diff).getSeconds() > this.deleteAfter/1000) {
+                    
+                    this.dispatchEvent(new Event("delete"))
+                }
+            }, this.deleteAfter)
+        }
     }
 
     showPath(){
@@ -44,8 +105,12 @@ class Laser extends EventTarget{
     }
 
     draw() {
+        if (this.externals.showLasers.selected !== 'lasers') return
         this.checkBlast()
         this.showPath()
-        this.checkHitPlayer()
+        this.checkPlayer()
+
+        if (this.moving) this.move()
+        if (this.deleting) this.del()
     }
 }

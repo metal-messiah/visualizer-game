@@ -1,5 +1,5 @@
 class Moveable extends EventTarget{
-	constructor(x, y) {
+	constructor(x, y, externals) {
         super()
 		this.pos = createVector(x, y);
 		this.vel = createVector();
@@ -9,6 +9,8 @@ class Moveable extends EventTarget{
 		this.maxForce = 0.1;
 
 		this.id = random();
+
+		this.externals = externals
 	}
 
 	applyForce(force) {
@@ -24,14 +26,6 @@ class Moveable extends EventTarget{
 	rotation() {
 		return this.vel.heading() + radians(90);
 	}
-
-	showPath(thickness){
-        push()
-        strokeWeight(thickness)
-        stroke('rgba(255,255,255,0.1)')
-        line(this.pos.x + this.width / 2, this.pos.y + this.height / 2, this.pos.x + this.vel.x * 1000000, this.pos.y + this.vel.y * 1000000)
-        pop()
-    }
 
 	seek(target) {
 		let speed = this.maxSpeed;

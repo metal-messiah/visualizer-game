@@ -11,11 +11,14 @@ class LoadSong{
     draw(){
         push()
         fill(0)
-        rect(windowWidth - this.x, this.y, this.width, this.height)
+        stroke(255)
+        strokeWeight(1)
+        rect(this.x, this.y, this.width, this.height)
         fill(255)
+        noStroke()
         textAlign(CENTER, CENTER)
-        if (!this.song) text('Load Song', windowWidth - 65, this.height)
-        if (this.song) text(this.song.name, windowWidth - 65, this.height)
+        if (!this.song) text('Load Song', this.x + this.width/2, this.y + this.height/2)
+        if (this.song) text(this.song.name.substr(0, 8) + '...', this.x + this.width/2, this.y + this.height/2)
         pop()
     }
 
@@ -28,6 +31,5 @@ class LoadSong{
 
     handleFile(file){
       this.song = file
-      console.log(this.song)
     }
 }

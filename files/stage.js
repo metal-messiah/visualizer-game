@@ -5,8 +5,10 @@ class Stage{
         this.height = windowHeight - this.padding
         this.pos = createVector(windowWidth/2 - this.width/2, windowHeight/2 - this.height/2)
     }
+    
 
     draw(){
+        push()
         fill(40)
         beginShape()
         vertex(0,0)
@@ -21,5 +23,6 @@ class Stage{
         vertex(this.pos.x + windowWidth - this.padding, this.pos.y)
         endContour()
         endShape(CLOSE)
+        pop()
     }
 }

@@ -2,24 +2,41 @@ class Amp extends EventTarget{
     constructor(amp){
         super()
         this.amp = new p5.Amplitude()
-        this.fft = new p5.FFT(0.9, 32)
-        this.bumpAt = 45
+        this.fft = new p5.FFT(0.9, 64)
+    }
+
+    avgArr(arr){
+        return arr.reduce((prev, curr) => prev + curr, 0) / arr.length;
     }
 
     checkLevel(){
-        if (this.level > this.bumpAt) {
+        if (this.level > 30 && this.lows > 200) {
             this.dispatchEvent(new Event("bump"))
+        }
+
+        if (this.mids > 50){
+            this.dispatchEvent(new Event("bounce"))
         }
     }
 
-    get bg(){
-        const spectrum = this.fft.analyze()
-        const lows = spectrum.slice(0, spectrum.length / 3)
-        const mids = spectrum.slice(spectrum.length / 3, 2 * spectrum.length / 3)
-        const highs = spectrum.slice(2* spectrum.length / 3)
+    get spectrum(){
+        return this.fft.analyze()
+    }
 
-        const avg = (arr) => arr.reduce((prev, curr) => prev + curr, 0) / arr.length;
-        return [avg(lows), avg(mids), avg(highs)]
+    get bg(){
+        return [this.lows, this.mids, this.highs]
+    }
+
+    get highs(){
+        return this.avgArr(this.spectrum.slice(2* this.spectrum.length / 3))
+    }
+
+    get mids(){
+        return this.avgArr(this.spectrum.slice(this.spectrum.length / 3, 2 * this.spectrum.length / 3))
+    }
+
+    get lows(){
+        return this.avgArr(this.spectrum.slice(0, this.spectrum.length / 3))
     }
 
     get level(){

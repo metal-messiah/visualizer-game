@@ -1,16 +1,16 @@
 class Timer{
     constructor(){
-        this.time = 0
+        this.startingTime = new Date()
     }
 
     draw(){
-        setTimeout(this.time + 1, 1000)
+        const now = new Date()
         push()
         stroke('white')
         fill('white')
         textAlign(CENTER, CENTER)
-        textSize(16)
-        text(this.time, 50, 50)
+        textSize('24pt')
+        text(new Date(now - this.startingTime).getSeconds(), 15, 15)
         pop()
     }
 } 

@@ -1,8 +1,8 @@
 class Player{
     constructor(externals){
         this.externals = externals
-        this.health = 6
-        this.color = 'lightblue'
+        this.maxHealth = 6
+        this.health = this.maxHealth
         this.x = windowWidth / 2
         this.y = windowHeight / 2
         this.d = 25
@@ -10,14 +10,14 @@ class Player{
         this.debounce = 1000
         this.debouncing = false
 
-        this.playMode
-
         this.initialSpeed = 5
         this.speed = this.initialSpeed
 
         this.boosting = false
         this.cooling = false
         this.invulnerable = false
+
+        this.pulse = null
     };
 
     boost(){
@@ -36,8 +36,16 @@ class Player{
     }
 
     draw(){
-        fill(this.color)
+        push()
+        stroke(255)
+        strokeWeight(1)
+        fill(0)
         circle(this.x, this.y, this.d)
+        textAlign(CENTER, CENTER)
+        fill(255)
+        noStroke()
+        text(this.health, this.x, this.y)
+        pop()
 
         const {stage, playMode} = this.externals
         const padding = this.d /2
@@ -62,26 +70,18 @@ class Player{
     }
 
     hurt(){
-        if (!this.debouncing){
+        if (!this.debouncing && !this.invulnerable){
             this.debouncing = true
-        this.health--
-        switch(this.health){
-            case 5:
-                this.color = 'green'
-                break;
-            case 4:
-                this.color = 'yellow'
-                break
-            case 3:
-                this.color = 'orange'
-                break
-            case 2:
-                this.color = 'red'
-                break
-            case 1: this.color = 'maroon'
-                break
-        }
-        setTimeout(() => this.debouncing = false, this.debounce)
+            this.health--
+            this.pulse = setInterval(() => {
+                this.d = random(20, 40)
+            }, 100)
+            setTimeout(() => {
+                this.debouncing = false
+                this.d = 25
+                clearInterval(this.pulse)
+                this.pulse = null
+            }, this.debounce)
         }
     }
 }
