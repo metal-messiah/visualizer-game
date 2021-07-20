@@ -75,8 +75,17 @@ function draw() {
 
   // GUI
   stage?.draw()
-  // timer?.draw()
-  if (!started) loadSong?.draw()
+  if (!started) {
+    push()
+    fill(`rgba(255,255,255, 0.5)`)
+    textSize(128)
+    textAlign(CENTER, CENTER)
+    textStyle(ITALIC)
+    textFont('Georgia')
+    text('DownBeat', windowWidth/2, windowHeight/2 - 30)
+    pop()
+    loadSong?.draw()
+  }
   playMode?.draw()
   showBubbles?.draw()
   showLasers?.draw()

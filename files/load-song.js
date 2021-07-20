@@ -10,7 +10,7 @@ class LoadSong{
 
     draw(){
         push()
-        fill(0)
+        fill(`rgba(0,0,0,0.7)`)
         stroke(255)
         strokeWeight(1)
         rect(this.x, this.y, this.width, this.height)
