@@ -13,4 +13,4 @@ This game/visualizer uses the amplitude and band analysis of any music file to g
 - Survive until the song ends to win
 - Customize the settings to fine-tune your game/visualization experience
 
-##### `This game is experimental and just meant for a fun way to teach my sons visual programming with JavaScript.  If something unexpected happens, don't take things so seriously.`
+##### `This game is experimental and just meant to be a fun way to teach my sons visual programming with JavaScript.  If something unexpected happens, don't take things so seriously.`
