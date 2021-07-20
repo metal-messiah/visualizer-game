@@ -1,3 +1,5 @@
+# DownBeat Music to Game Generator
+
 ### Convert any song file into a game or visualization!
 
 This game/visualizer uses the amplitude and band analysis of any music file to generate visualizations and game obstacles on the fly
